@@ -1,0 +1,65 @@
+sudo: false
+
+install: skip
+
+jobs:
+  include:
+    - stage: test
+      env: name=ingest
+      script:
+        - shellcheck ingest/*.sh
+
+    - stage: test
+      env: name=series
+      script:
+        - shellcheck create-series/create-series.sh
+
+    - stage: test
+      env: name=schedule
+      script:
+        - shellcheck schedule-now-*/*.sh
+
+    - stage: test
+      env: name=changelog
+      language: python
+      python: "3.6"
+      install:
+        - pip install flake8
+      script:
+        - flake8 create-changelog/changelog.py
+
+    - stage: test
+      env: name=csv-export
+      language: python
+      python:
+        - "2.7"
+        - "3.6"
+      install:
+        - pip install flake8
+      script:
+        - shellcheck csv-export/getEvents.sh
+        - flake8 csv-export/events2csv.py
+
+    - stage: test
+      env: name=visualize-workflow
+      language: python
+      python:
+        - "3.6"
+      install:
+        - pip install flake8
+      script:
+        - shellcheck visualize-workflow/*.sh
+        - flake8 visualize-workflow/*.py
+        - (! grep -rn '	' visualize-workflow/)
+        - (! grep -rn ' $' visualize-workflow/)
+
+    - stage: test
+      env: name=start-workflow-from-archive
+      language: python
+      python:
+        - "3.6"
+      install:
+        - pip install flake8
+      script:
+        - shellcheck start-workflow-from-archive/*.sh
+        - flake8 start-workflow-from-archive/*.py
